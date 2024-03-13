@@ -39,10 +39,11 @@ func (ech *EchoDelivery) Create(ectx echo.Context) error {
 }
 
 func (ech *EchoDelivery) List(ectx echo.Context) error {
-
+	cnt := 0
 	tmp := ectx.QueryParam("account")
 	if tmp == "" {
 		tmp = "0"
+		cnt++
 	}
 	account, err := strconv.Atoi(tmp)
 	if err != nil {
@@ -52,6 +53,7 @@ func (ech *EchoDelivery) List(ectx echo.Context) error {
 	tmp2 := ectx.QueryParam("value")
 	if tmp2 == "" {
 		tmp2 = "0"
+		cnt++
 	}
 	value, err := strconv.ParseFloat(tmp2, 64)
 	if err != nil {
@@ -59,23 +61,21 @@ func (ech *EchoDelivery) List(ectx echo.Context) error {
 	}
 
 	name := ectx.QueryParam("name")
+	if name == "" {
+		cnt++
+	}
 
-	newUser := &models.Filter{
-		Name:    ectx.QueryParam("name"),
+	filter := &models.Filter{
+		Name:    name,
 		Account: account,
 		Value:   value,
 	}
 
-	if name != "" && account != 0 && value == 0 {
+	if cnt < 2 {
 		return ectx.JSON(http.StatusBadRequest, "Было передано более одного параметра фильтрации")
 	}
-	if name == "" && account != 0 && value != 0 {
-		return ectx.JSON(http.StatusBadRequest, "Было передано более одного параметра фильтрации")
-	}
-	if name != "" && account == 0 && value != 0 {
-		return ectx.JSON(http.StatusBadRequest, "Было передано более одного параметра фильтрации")
-	}
-	return ectx.JSON(http.StatusOK, ech.base.List(newUser))
+
+	return ectx.JSON(http.StatusOK, ech.base.List(filter))
 }
 
 func (ech *EchoDelivery) Delete(ectx echo.Context) error {

@@ -36,7 +36,7 @@ func (b *Base) Create(filter *models.Filter) error {
 	b.searchValue.items[filter.Value] = models.SearchValue{
 		Name:    filter.Name,
 		Account: filter.Account,
-	}
+	} //Заменить ссылки  на ссылки на базу
 	return nil
 }
 
@@ -48,7 +48,8 @@ func (b *Base) Delete(account int) []models.Users {
 			b.items = append(b.items[:i], b.items[i+1:]...)
 			return res
 		}
-	}
+	} //Переделать на поиск по search
+	//Удаление из map
 	return nil
 }
 
@@ -60,7 +61,7 @@ func (b *Base) Update(filter *models.Filter, account int) []models.Users {
 			b.items = append(append(b.items[:i], models.Users(*filter)), b.items[i+1:]...)
 			return res
 		}
-	}
+	} //Переделать на поиск по search
 	return nil
 }
 

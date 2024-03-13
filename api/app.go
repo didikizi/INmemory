@@ -13,10 +13,10 @@ func App() {
 	delivery := delivery.New(*base)
 	server := echo.New()
 
-	server.GET("/users", delivery.List)               //+
-	server.POST("/users", delivery.Create)            //+
-	server.DELETE("/users/:Account", delivery.Delete) //+
-	server.PUT("/users/:Account", delivery.Update)    //+
+	server.GET("/users", delivery.List)               //Ошибка на уровне базы с логикой вывода
+	server.POST("/users", delivery.Create)            //Поставить валидатор значений!
+	server.DELETE("/users/:Account", delivery.Delete) //Удаление из MAP
+	server.PUT("/users/:Account", delivery.Update)    //Обновить систему поиска
 
 	log.Fatal(server.Start(":8081"))
 }
