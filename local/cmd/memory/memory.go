@@ -26,17 +26,17 @@ func (b *Base) Create(filter *models.Filter) error {
 		Value:   filter.Value,
 	})
 	b.searchAccount.items[filter.Account] = models.SearchAccount{
-		Name:  filter.Name,
-		Value: filter.Value,
+		Name:  b.items[len(b.items)-1].Name,
+		Value: b.items[len(b.items)-1].Value,
 	}
 	b.searchName.items[filter.Name] = models.SearchName{
-		Account: filter.Account,
-		Value:   filter.Value,
+		Account: b.items[len(b.items)-1].Account,
+		Value:   b.items[len(b.items)-1].Value,
 	}
 	b.searchValue.items[filter.Value] = models.SearchValue{
-		Name:    filter.Name,
-		Account: filter.Account,
-	} //Заменить ссылки  на ссылки на базу
+		Name:    b.items[len(b.items)-1].Name,
+		Account: b.items[len(b.items)-1].Account,
+	}
 	return nil
 }
 
@@ -46,10 +46,12 @@ func (b *Base) Delete(account int) []models.Users {
 		if tmp.Account == account {
 			res = append(res, tmp)
 			b.items = append(b.items[:i], b.items[i+1:]...)
+			delete(b.searchAccount.items, tmp.Account)
+			delete(b.searchName.items, tmp.Name)
+			delete(b.searchValue.items, tmp.Value)
 			return res
 		}
-	} //Переделать на поиск по search
-	//Удаление из map
+	}
 	return nil
 }
 
@@ -61,14 +63,17 @@ func (b *Base) Update(filter *models.Filter, account int) []models.Users {
 			b.items = append(append(b.items[:i], models.Users(*filter)), b.items[i+1:]...)
 			return res
 		}
-	} //Переделать на поиск по search
+	}
 	return nil
 }
 
 func (b *Base) List(filter *models.Filter) []models.Users {
 	var res []models.Users
 	if filter.Account != 0 {
-		tmp := b.searchAccount.items[filter.Account]
+		tmp, ok := b.searchAccount.items[filter.Account]
+		if !ok {
+			return nil
+		}
 		res = append(res, models.Users{
 			Value:   tmp.Value,
 			Account: filter.Account,
@@ -77,7 +82,10 @@ func (b *Base) List(filter *models.Filter) []models.Users {
 		return res
 	}
 	if filter.Name != "" {
-		tmp := b.searchName.items[filter.Name]
+		tmp, ok := b.searchName.items[filter.Name]
+		if !ok {
+			return nil
+		}
 		res = append(res, models.Users{
 			Value:   tmp.Value,
 			Account: tmp.Account,
@@ -86,7 +94,10 @@ func (b *Base) List(filter *models.Filter) []models.Users {
 		return res
 	}
 	if filter.Value != 0 {
-		tmp := b.searchValue.items[filter.Value]
+		tmp, ok := b.searchValue.items[filter.Value]
+		if !ok {
+			return nil
+		}
 		res = append(res, models.Users{
 			Value:   filter.Value,
 			Account: tmp.Account,
