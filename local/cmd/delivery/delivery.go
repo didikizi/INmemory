@@ -14,6 +14,7 @@ type EchoDeliveries interface {
 	Update(ectx echo.Context) error
 	List(ectx echo.Context) error
 	Delete(ectx echo.Context) error
+	Logon(b memory.Base) echo.MiddlewareFunc
 }
 
 type EchoDelivery struct {

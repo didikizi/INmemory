@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"inmemory/local/cmd/delivery"
+	jwt "inmemory/local/cmd/delivery/jwt"
 	memory "inmemory/local/cmd/memory"
 	"net/http"
 	"os"
@@ -16,18 +17,23 @@ import (
 	log "github.com/labstack/gommon/log"
 )
 
+var key = "secretkey"
+
 func App() {
 	base := memory.NewBase()
 	delivery := delivery.New(*base)
+	jwtBase := jwt.New(*base, key)
 	server := echo.New()
 
 	server.Use(middleware.Recover())
 	server.Use(middleware.Logger())
-
 	server.Logger.SetLevel(log.DEBUG)
 
+	server.POST("/login", jwtBase.Login)
+	server.GET("/users", delivery.List)
+
 	v1Group := server.Group("/v1")
-	v1Group.GET("/users", delivery.List)
+	v1Group.Use(jwt.JWTAutoMiddleware(key))
 	v1Group.POST("/users", delivery.Create)
 	v1Group.DELETE("/users/:Account", delivery.Delete)
 	v1Group.PUT("/users/:Account", delivery.Update)

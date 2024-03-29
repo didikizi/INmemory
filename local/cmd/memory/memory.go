@@ -19,6 +19,15 @@ type SearchValue struct {
 	items map[float64]models.SearchValue
 }
 
+func (b *Base) Validate(account int, pass string) bool {
+	for _, tmp := range b.items {
+		if tmp.Account == account && tmp.Pass == pass {
+			return true
+		}
+	}
+	return false
+}
+
 func (b *Base) Create(filter *models.Filter) error {
 	b.items = append(b.items, models.Users{
 		Account: filter.Account,
@@ -59,8 +68,14 @@ func (b *Base) Update(filter *models.Filter, account int) []models.Users {
 	var res []models.Users
 	for i, tmp := range b.items {
 		if tmp.Account == account {
+			tmparr := models.Users{
+				Account: filter.Account,
+				Name:    filter.Name,
+				Value:   filter.Value,
+				Pass:    b.items[i].Pass,
+			}
 			res = append(res, tmp)
-			b.items = append(append(b.items[:i], models.Users(*filter)), b.items[i+1:]...)
+			b.items = append(append(b.items[:i], tmparr), b.items[i+1:]...)
 			return res
 		}
 	}
@@ -114,6 +129,7 @@ func NewBase() *Base {
 			Account: 0,
 			Name:    "Test",
 			Value:   0.1,
+			Pass:    "0000",
 		},
 	}
 

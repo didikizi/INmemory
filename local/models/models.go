@@ -1,9 +1,10 @@
 package models
 
 type Users struct {
-	Account int     `json:"Account"`
+	Account int     `json:"account"`
 	Name    string  `json:"name"`
 	Value   float64 `json:"value"`
+	Pass    string  `json:"-"`
 }
 
 type Filter struct {
