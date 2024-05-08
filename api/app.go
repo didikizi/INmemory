@@ -11,10 +11,13 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
+	echoPrometheus "github.com/globocom/echo-prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	log "github.com/labstack/gommon/log"
+
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var key = "secretkey"
@@ -25,10 +28,12 @@ func App() {
 	jwtBase := jwt.New(*base, key)
 	server := echo.New()
 
+	server.Use(echoPrometheus.MetricsMiddleware())
 	server.Use(middleware.Recover())
 	server.Use(middleware.Logger())
 	server.Logger.SetLevel(log.DEBUG)
 
+	server.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 	server.POST("/login", jwtBase.Login)
 	server.GET("/users", delivery.List)
 
